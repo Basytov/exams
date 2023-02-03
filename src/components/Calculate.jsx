@@ -1,73 +1,55 @@
-import React, { useState, useReducer, useEffect } from "react";
-// import "./styles.css";
+import React, { useReducer, useEffect } from "react";
 
-const initialState = { value: "" };
+const initialState = {
+  expression: "",
+  result: 0,
+};
 
 function reducer(state, action) {
-  const num1 = parseInt(action.num1, 10);
-  const num2 = parseInt(action.num2, 10);
-
-  if (isNaN(num1) || isNaN(num2)) return initialState;
-
-  switch (action.num) {
-    case "SUM":
-      return {
-        value: num1 + num2,
-      };
-    case "DIFFERENCE":
-      return {
-        value: num1 - num2,
-      };
-    case "PRODUCT":
-      return {
-        value: num1 * num2,
-      };
-    case "QUOTIENT":
-      return {
-        value: num1 / num2,
-      };
-    case "EXPONENTIATION":
-      return {
-        value: Math.pow(num1, num2),
-      };
+  switch (action.type) {
+    case "CHANGE":
+      return { ...state, expression: action.payload };
+    case "CALCULATE":
+      return { ...state, result: eval(state.expression) };
     default:
-      return state;
+      break;
   }
 }
 
-export default function App() {
-  const [num1, setNum1] = useState("");
-  const [num2, setNum2] = useState("");
-  const [num, setNum] = useState("SUM");
+function Calculator() {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
-    dispatch({ num, num1, num2 });
-  }, [num1, num2, num]);
+    console.log(state);
+  }, [state]);
+
+  function expressionChange(event) {
+    dispatch({ type: "CHANGE", payload: event.target.value });
+  }
+
+  function handleCalculate() {
+    dispatch({ type: "CALCULATE" });
+  }
+
+  function mathSymbol(symbol) {
+    dispatch({ type: "CHANGE", payload: state.expression + symbol });
+  }
 
   return (
-    <div className="App">
-      <h1>Calculator</h1>
-      <div className="form">
-        <input
-          value={num1}
-          onChange={(evt) => setNum1(evt.target.value)}
-          type="number"
-        />
-        <select value={num} onChange={(evt) => setNum(evt.target.value)}>
-          <option value="SUM">+</option>
-          <option value="DIFFERENCE">-</option>
-          <option value="PRODUCT">*</option>
-          <option value="QUOTIENT">/</option>
-          <option value="EXPONENTIATION">^</option>
-        </select>
-        <input
-          value={num2}
-          onChange={(evt) => setNum2(evt.target.value)}
-          type="number"
-        />
-      </div>
-      {state.value && <h2> result: {state.value}</h2>}
+    <div>
+      <input
+        type="text"
+        value={state.expression}
+        onChange={expressionChange}
+      />
+      <button onClick={() => mathSymbol("+")}>+</button>
+      <button onClick={() => mathSymbol("-")}>-</button>
+      <button onClick={() => mathSymbol("/")}>/</button>
+      <button onClick={() => mathSymbol("*")}>*</button>
+      <button onClick={handleCalculate}>Calculate</button>
+      <h1>Result: {state.result}</h1>
     </div>
   );
 }
+
+export default Calculator;
